@@ -6,21 +6,23 @@ import matplotlib.pyplot as plt
 import random
 
 class Knn():
-    def __init__(self, points=None, result=None, lenght=5, k=3):
-        if points == None:
+    def __init__(self, k=3):
+        self.k = k
+    
+    def fit(self, points=None, result=None, lenght=5):
+        self.points = points
+        self.result = result
+        self.lenght = lenght
+        if self.points == None:
             self.points = [(random.random(), random.random()) for x in range(lenght)]
-            self.lenght = lenght
-            if k > len(self.points):
-                k = 3
+            if self.k > len(self.points):
+                self.k = 3
         else:
             self.lenght = len(self.points)
         if result == None:
             self.result = [random.randint(0, 1) for x in range(lenght)]
         elif len(result) != len(self.points):
             self.result = [random.randint(0, 1) for x in range(lenght)]
-        else:
-            self.result = result
-        self.k = k
 
     # Определяем групповую принадлежность элемента на основе k ближайших соседей
     def predict(self, new):
@@ -43,14 +45,27 @@ class Knn():
             freq[el] = freq.get(el, 0) + 1
         z = list(freq.items())
         z.sort(key=lambda x: x[1])
-        print(z)
         return z[-1][0]
 
     # Добавляем в множество точек точку new, при этом определяя её групповую принадлежность
-    def fit(self, new):
+    def add(self, new):
         answer = self.predict(new)
         self.points.append(new)
         self.result.append(answer)
+        
+        
+    def group_predict(self, sp):
+        answer = []
+        for el in sp:
+            answer.append(self.predict(el))
+        return answer
+    
+    
+    def group_add(self, sp):
+        answer = []
+        for el in sp:
+            answer.append(self.add(el))
+            
 
     def draw(self):
         colors = ["r", 'g', 'b', 'yellow', 'orange', "purple", "brown", (0, 0.8, 0.5)]
@@ -63,10 +78,13 @@ class Knn():
             plt.plot([x[0] for x in sp], [x[1] for x in sp], "o", c=colors[i % len(colors)])
         plt.show()
 
+        
     def start_draw(self):
         plt.plot([x[0] for x in self.points], [x[1] for x in self.points], 'o')
         plt.show()
 
-x = Knn(result=list([random.randint(0, 3) for x in range(45)]), lenght=45, k=5)
-x.fit((0.5, 0.5))
+x = Knn(k=3)
+x.fit()
+x.draw()
+x.group_add([(0.5, 0.5), (0.2, 0.6)])
 x.draw()
